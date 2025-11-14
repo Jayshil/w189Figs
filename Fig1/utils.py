@@ -2,10 +2,54 @@ import numpy as np
 from celerite2.terms import SHOTerm
 from celerite2 import GaussianProcess
 from pytransit import OblateStarModel
-from scipy.signal import medfilt
 import astropy.constants as con
 import astropy.units as u
-import juliet
+
+def get_phases(t, P, t0, phmin=0.5):
+    """
+    -----------------------------------------------------------
+    Re-writing juliet function here to avoid dependency issues.
+    And so that the user doesn't need to install juliet
+    -----------------------------------------------------------
+
+    Given input times, a period (or posterior dist of periods)
+    and time of transit center (or posterior), returns the
+    phase at each time t.
+    """
+    if type(t) is not float:
+
+        phase = ( (t - np.median(t0)) / np.median(P) ) % 1
+        ii = np.where(phase >= phmin)[0]
+        phase[ii] = phase[ii] - 1.0
+      
+    else:
+      
+        phase = ((t - np.median(t0)) / np.median(P)) % 1
+        
+        if phase >= 0.5:
+            phase = phase - 1.0
+            
+    return phase
+
+def reverse_ld_coeffs(ld_law, q1, q2):
+    """
+    -----------------------------------------------------------
+    Re-writing juliet function here to avoid dependency issues.
+    And so that the user doesn't need to install juliet
+    -----------------------------------------------------------
+    """
+    if ld_law == 'quadratic':
+        coeff1 = 2. * np.sqrt(q1) * q2
+        coeff2 = np.sqrt(q1) * (1. - 2. * q2)
+    elif ld_law == 'squareroot':
+        coeff1 = np.sqrt(q1) * (1. - 2. * q2)
+        coeff2 = 2. * np.sqrt(q1) * q2
+    elif ld_law == 'logarithmic':
+        coeff1 = 1. - np.sqrt(q1) * q2
+        coeff2 = 1. - np.sqrt(q1)
+    elif ld_law == 'linear':
+        return q1, q2
+    return coeff1, coeff2
 
 def lcbin(time, flux, binwidth=0.06859, nmin=4, time0=None,
         robust=False, tmid=False):
@@ -116,7 +160,7 @@ def evaluate_pytransit_CowanPC_model(times, fluxes, errors, fltr, per, bjd0, rpr
     rho = rho.value
    
     ## LDCs
-    u1, u2 = juliet.utils.reverse_ld_coeffs('quadratic', q1, q2)
+    u1, u2 = reverse_ld_coeffs('quadratic', q1, q2)
     ldcs = np.array([u1, u2])
     
     ## rprs to numpy.ndarray (as `pytransit` only takes array for k)

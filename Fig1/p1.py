@@ -1,12 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gd
-import juliet
 from pytransit.contamination import TabulatedFilter
 from utils import evaluate_pytransit_CowanPC_model
 import plotstyles
-from utils import lcbin
-from kelp import Filter
+from utils import lcbin, get_phases
 import pickle
 import os
 
@@ -26,9 +24,6 @@ wav_t, band_t = wav_t*1e9, band_t/np.max(band_t)
 ### Saving bandpass so that `pytransit` can understand it!
 fltr_t = TabulatedFilter('TESS', wav_t, band_t)
 
-## TESS bandpass, in Kelp way!
-filt_kelp = Filter.from_name("TESS")
-
 # Creating the median physical model and random models
 
 ## Loading the parameters
@@ -39,11 +34,11 @@ samples = post['posterior_samples']
 dummy_tim = np.linspace( np.nanmedian(samples['t0_p1'] - 0.499*samples['P_p1']), np.nanmedian(samples['t0_p1'] + 0.499*samples['P_p1']), 10000)
 dummy_fl, dummy_fle = np.ones(len(dummy_tim)), 0.1 * np.ones(len(dummy_tim))
 
-phases_tra = juliet.utils.get_phases(t=tim7, P=np.nanmedian(samples['P_p1']), t0=np.nanmedian(samples['t0_p1']), phmin=0.5)
-phases_pc = juliet.utils.get_phases(t=tim7, P=np.nanmedian(samples['P_p1']), t0=np.nanmedian(samples['t0_p1']), phmin=0.8)
+phases_tra = get_phases(t=tim7, P=np.nanmedian(samples['P_p1']), t0=np.nanmedian(samples['t0_p1']), phmin=0.5)
+phases_pc = get_phases(t=tim7, P=np.nanmedian(samples['P_p1']), t0=np.nanmedian(samples['t0_p1']), phmin=0.8)
 
-dummy_phs_tra = juliet.utils.get_phases(t=dummy_tim, P=np.nanmedian(samples['P_p1']), t0=np.nanmedian(samples['t0_p1']), phmin=0.5)
-dummy_phs_pc = juliet.utils.get_phases(t=dummy_tim, P=np.nanmedian(samples['P_p1']), t0=np.nanmedian(samples['t0_p1']), phmin=0.8)
+dummy_phs_tra = get_phases(t=dummy_tim, P=np.nanmedian(samples['P_p1']), t0=np.nanmedian(samples['t0_p1']), phmin=0.5)
+dummy_phs_pc = get_phases(t=dummy_tim, P=np.nanmedian(samples['P_p1']), t0=np.nanmedian(samples['t0_p1']), phmin=0.8)
 
 ## For GP and phase-off param
 try:
