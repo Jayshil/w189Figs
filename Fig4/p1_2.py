@@ -4,7 +4,7 @@ import plotstyles
 import os
 
 # Loading the temperature map
-temp_map = np.load(os.getcwd() + '/Data/Med_temperature_Map.npy')
+temp_map = np.load(os.getcwd() + '/Data/Med_temperature_Map_CHEOPS.npy')
 
 # Generating the nesg
 ntheta, nphi = 49, 100
