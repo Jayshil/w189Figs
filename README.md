@@ -7,3 +7,5 @@ Authors: J. A. Patel, D. Kitzmann, A. Brandeker, T. G. Wilson, A. Deline, M. Len
 The directories are self-explanatory. Please look at the publication for more details on the figures.
 
 Code dependencies: `numpy`, `matplotlib`, `PyTransit`, `astropy`, `celerite2`.
+
+Remember to unzip a file in data folder.
